@@ -1,0 +1,13 @@
+- name: Validate nginx
+  hosts: tag_Purpose_poc-web
+  become: true
+  tasks:
+    - name: Check nginx
+      shell: systemctl is-active nginx
+      register: status
+      failed_when: status.stdout != "active"
+
+    - name: Test port
+      uri:
+        url: http://localhost:8080
+        return_content: yes
