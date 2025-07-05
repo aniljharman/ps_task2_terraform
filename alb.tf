@@ -10,7 +10,10 @@ resource "aws_lb_target_group" "web_tg" {
   port     = 8080
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
-  health_check { path = "/" port = "8080" }
+  health_check {
+    path = "/"
+    port = "8080"
+  }
 }
 
 resource "aws_lb_listener" "http" {
