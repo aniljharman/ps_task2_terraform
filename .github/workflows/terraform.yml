@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 permissions:
-  id-token: write
+  id-token: write 
   contents: read
 
 jobs:
@@ -30,6 +30,13 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: .   # 👈 TF files are in root
 
       - name: Terraform Plan
         run: terraform plan
+        working-directory: .   # 👈 TF files are in root
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve
+        working-directory: .   # 👈 TF files are in root
