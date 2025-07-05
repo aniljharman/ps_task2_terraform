@@ -34,7 +34,11 @@ jobs:
           terraform_version: 1.4.6
 
       - name: Terraform Init
-        run: terraform init      
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=poc/terraform.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}"   
 
       - name: Terraform Plan
         run: terraform plan
