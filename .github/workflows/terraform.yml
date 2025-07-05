@@ -2,15 +2,20 @@ name: Terraform POC Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
-  id-token: write 
+  id-token: write
   contents: read
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
+
+    # 👇 Everything in this job now runs inside the repo root
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
 
     steps:
       - name: Checkout code
@@ -29,14 +34,11 @@ jobs:
           terraform_version: 1.4.6
 
       - name: Terraform Init
-        run: terraform init
-        working-directory: .   # 👈 TF files are in root
+        run: terraform init      
 
       - name: Terraform Plan
         run: terraform plan
-        working-directory: .   # 👈 TF files are in root
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
-        working-directory: .   # 👈 TF files are in root
