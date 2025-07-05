@@ -1,6 +1,33 @@
-resource "aws_vpc" "main" { ... }
-resource "aws_internet_gateway" "gw" { ... }
-resource "aws_subnet" "public" { ... }
-resource "aws_route_table" "public" { ... }
-resource "aws_route" "public_internet" { ... }
-resource "aws_route_table_association" "public_assoc" { ... }
+resource "aws_vpc" "main" {
+  cidr_block           = var.vpc_cidr
+  enable_dns_hostnames = true
+  tags = { Name = "zantac-poc-vpc" }
+}
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
+  tags   = { Name = "poc-igw" }
+}
+
+data "aws_availability_zones" "azs" {}
+
+resource "aws_subnet" "public" {
+  for_each               = toset(var.public_subnets)
+  vpc_id                 = aws_vpc.main.id
+  cidr_block             = each.value
+  availability_zone      = data.aws_availability_zones.azs.names[index(var.public_subnets, each.value)]
+  map_public_ip_on_launch= true
+  tags = { Name = "poc-public-${each.key}" }
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+  route  { cidr_block = "0.0.0.0/0"  gateway_id = aws_internet_gateway.gw.id }
+  tags   = { Name = "poc-public-rt" }
+}
+
+resource "aws_route_table_association" "public_assoc" {
+  for_each       = aws_subnet.public
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.public.id
+}
